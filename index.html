@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0d12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="My Schedule">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+<title>My Schedule</title>
+</head>
+<body>
+<div class="app">
+<header class="top-header">
+  <div>
+    <div class="header-title">Расписание</div>
+    <div class="header-date" id="currentDate"></div>
+  </div>
+  <button class="icon-button" onclick="openScreen('settingsScreen')">⚙</button>
+</header>
+
+<section class="day-selector" id="daySelector">
+  <button class="day-button" data-day="ПН">ПН</button>
+  <button class="day-button" data-day="ВТ">ВТ</button>
+  <button class="day-button" data-day="СР">СР</button>
+  <button class="day-button" data-day="ЧТ">ЧТ</button>
+  <button class="day-button" data-day="ПТ">ПТ</button>
+  <button class="day-button" data-day="СБ">СБ</button>
+</section>
+
+<main class="content">
+  <div class="section-title">
+    <div><small>Сегодня</small><h2 id="selectedDay">Среда</h2></div>
+    <button class="text-button" onclick="openScreen('weekScreen')">Вся неделя</button>
+  </div>
+
+  <section id="currentCard" class="current-card glass hidden">
+    <div class="current-status"><span class="live-dot"></span> СЕЙЧАС</div>
+    <div class="current-time" id="currentTime"></div>
+    <div class="current-subject" id="currentSubject"></div>
+    <div class="current-meta">
+      <span class="meta-chip" id="currentRoom"></span>
+      <span class="meta-chip" id="currentTeacher"></span>
+    </div>
+    <div class="remaining">
+      <div class="timer-ring" id="currentRing"><div><span>Осталось</span><strong id="remainingTime">00:00</strong></div></div>
+    </div>
+  </section>
+
+  <section id="breakCard" class="break-card glass hidden">
+    <div class="break-icon">☕</div>
+    <div><div class="break-title">ПЕРЕРЫВ</div><div class="break-text" id="breakText"></div></div>
+    <div class="break-countdown" id="breakCountdown"></div>
+  </section>
+
+  <section id="nextCard" class="next-card glass hidden">
+    <div class="next-label">Следующая пара</div>
+    <div class="next-row">
+      <div class="next-time" id="nextTime"></div>
+      <div>
+        <div class="next-name" id="nextName"></div>
+        <div class="next-room" id="nextRoom"></div>
+      </div>
+    </div>
+    <div class="next-timer-row">
+      <div class="timer-ring small-ring" id="nextRing"><div><span>До пары</span><strong id="nextCountdown">00:00</strong></div></div>
+    </div>
+  </section>
+
+  <div class="section-title schedule-heading"><h3>Расписание дня</h3><button class="text-button" onclick="openScreen('weekScreen')">Все пары</button></div>
+  <section id="scheduleList" class="lesson-list"></section>
+  <div class="home-actions">
+    <button class="home-action glass" onclick="openScreen('weekScreen')"><span>📚</span><b>Вся неделя</b><small>Пары по дням</small></button>
+    <button class="home-action glass" onclick="openNextWeek()"><span>→</span><b>Следующая неделя</b><small>Просмотреть дальше</small></button>
+  </div>
+</main>
+
+<nav class="bottom-nav glass">
+  <button class="nav-button active" data-page="schedule" onclick="showMain()"><span class="nav-icon">⌂</span><span class="nav-label">Расписание</span></button>
+  <button class="nav-button" data-page="tasks" onclick="openScreen('tasksScreen')"><span class="nav-icon">✓</span><span class="nav-label">Задания</span></button>
+  <button class="nav-button" data-page="notes" onclick="openScreen('notesScreen')"><span class="nav-icon">□</span><span class="nav-label">Заметки</span></button>
+  <button class="nav-button" data-page="more" onclick="openScreen('moreScreen')"><span class="nav-icon">•••</span><span class="nav-label">Ещё</span></button>
+</nav>
+</div>
+
+<div id="lessonScreen" class="screen">
+  <div class="page-header"><button class="back-button" onclick="closeScreen('lessonScreen')">‹</button><h2>Пара</h2><div></div></div>
+  <div class="detail-card glass">
+    <div class="detail-time" id="detailTime"></div>
+    <h1 id="detailName"></h1>
+    <div class="detail-row"><span>📍</span><div><small>Аудитория</small><p id="detailRoom"></p></div></div>
+    <div class="detail-row"><span>👩‍🏫</span><div><small>Преподаватель</small><p id="detailTeacher"></p></div></div>
+    <div class="detail-row"><span>📚</span><div><small>Тип занятия</small><p id="detailType"></p></div></div>
+    <div class="note-box"><small>Заметка</small><textarea id="lessonNote" placeholder="Добавить заметку..."></textarea><button onclick="saveLessonNote()">Сохранить</button></div>
+  </div>
+</div>
+
+<div id="tasksScreen" class="screen">
+  <div class="page-header"><button class="back-button" onclick="closeScreen('tasksScreen')">‹</button><h2>Задания</h2><button class="add-button" onclick="addTask()">＋</button></div>
+  <div id="tasksList" class="items-list"></div>
+</div>
+
+<div id="notesScreen" class="screen">
+  <div class="page-header"><button class="back-button" onclick="closeScreen('notesScreen')">‹</button><h2>Заметки</h2><button class="add-button" onclick="addNote()">＋</button></div>
+  <div id="notesList" class="items-list"></div>
+</div>
+
+<div id="weekScreen" class="screen">
+  <div class="page-header"><button class="back-button" onclick="closeScreen('weekScreen')">‹</button><h2>Вся неделя</h2><div></div></div>
+  <div id="weekList" class="week-list"></div>
+</div>
+
+<div id="moreScreen" class="screen">
+  <div class="page-header"><button class="back-button" onclick="closeScreen('moreScreen')">‹</button><h2>Ещё</h2><div></div></div>
+  <div class="menu-list glass">
+    <button onclick="openScreen('calendarScreen')"><span>📅</span><span>Календарь</span><b>›</b></button>
+    <button onclick="openScreen('subjectsScreen')"><span>📚</span><span>Предметы и экзамены</span><b>›</b></button>
+    <button onclick="openScreen('settingsScreen')"><span>⚙️</span><span>Настройки</span><b>›</b></button>
+    <button onclick="openScreen('appearanceScreen')"><span>🎨</span><span>Внешний вид</span><b>›</b></button>
+    <button onclick="openScreen('notificationsScreen')"><span>🔔</span><span>Уведомления</span><b>›</b></button>
+  </div>
+</div>
+
+<div id="subjectsScreen" class="screen">
+<div class="page-header"><button class="back-button" onclick="closeScreen('subjectsScreen')">‹</button><h2>Предметы</h2><button class="add-button" onclick="addSubject()">＋</button></div>
+<div class="screen-subtitle">Экзамены, вопросы и задания</div><div id="subjectsList" class="items-list"></div>
+</div>
+<div id="calendarScreen" class="screen">
+  <div class="page-header"><button class="back-button" onclick="closeScreen('calendarScreen')">‹</button><h2>Календарь</h2><div></div></div>
+  <div class="calendar glass">
+    <div class="calendar-header"><button onclick="changeMonth(-1)">‹</button><h3 id="calendarMonth"></h3><button onclick="changeMonth(1)">›</button></div>
+    <div class="calendar-weekdays"><span>ПН</span><span>ВТ</span><span>СР</span><span>ЧТ</span><span>ПТ</span><span>СБ</span><span>ВС</span></div>
+    <div id="calendarGrid" class="calendar-days"></div>
+  </div>
+</div>
+
+<div id="appearanceScreen" class="screen">
+  <div class="page-header"><button class="back-button" onclick="closeScreen('appearanceScreen')">‹</button><h2>Внешний вид</h2><div></div></div>
+  <div class="settings-group glass">
+    <div class="settings-title">Тема</div>
+    <button class="settings-item" onclick="setTheme('dark')"><span>🌙 Тёмная</span><span>›</span></button>
+    <button class="settings-item" onclick="setTheme('light')"><span>☀️ Светлая</span><span>›</span></button>
+  </div>
+</div>
+
+<div id="notificationsScreen" class="screen">
+  <div class="page-header"><button class="back-button" onclick="closeScreen('notificationsScreen')">‹</button><h2>Уведомления</h2><div></div></div>
+  <div class="settings-group glass">
+    <div class="settings-title">Напоминания</div>
+    <label class="settings-item"><span>Уведомлять о паре</span><input type="checkbox" id="notificationToggle"></label>
+  </div>
+</div>
+
+<div id="settingsScreen" class="screen">
+  <div class="page-header"><button class="back-button" onclick="closeScreen('settingsScreen')">‹</button><h2>Настройки</h2><div></div></div>
+  <div class="settings-group glass">
+    <div class="settings-title">Основные</div>
+    <button class="settings-item" onclick="openScreen('appearanceScreen')"><span>Внешний вид</span><span>›</span></button>
+    <button class="settings-item" onclick="openScreen('notificationsScreen')"><span>Уведомления</span><span>›</span></button>
+    <div class="settings-item"><span>Академический час</span><strong>50 мин</strong></div>
+    <div class="settings-item"><span>Перерыв</span><strong>10 мин</strong></div>
+  </div>
+  <div class="about glass"><p>My Schedule</p><small>Персональное расписание ИВТ-1-24</small><small>Версия 1.0</small></div>
+</div>
+
+<div id="subjectModal" class="modal-overlay"><div class="modal"><div class="modal-handle"></div><h3 class="modal-title">Предмет</h3><input id="subjectName" class="form-input" placeholder="Название предмета"><input id="subjectExam" class="form-input" type="date"><textarea id="subjectQuestions" class="form-textarea" placeholder="Вопросы, темы, задания..."></textarea><button class="modal-save" onclick="saveSubject()">Сохранить</button><button class="close-button" onclick="closeModal('subjectModal')">Отмена</button></div></div>
+<div id="taskModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-handle"></div><h3 class="modal-title">Новое задание</h3>
+    <input id="taskTitle" class="form-input" placeholder="Название задания">
+    <input id="taskSubject" class="form-input" placeholder="Предмет">
+    <input id="taskDate" class="form-input" type="date">
+    <button class="modal-save" onclick="saveTask()">Добавить</button>
+    <button class="close-button" onclick="closeModal('taskModal')">Отмена</button>
+  </div>
+</div>
+
+<div id="noteModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-handle"></div><h3 class="modal-title">Новая заметка</h3>
+    <input id="noteTitle" class="form-input" placeholder="Заголовок">
+    <textarea id="noteText" class="form-textarea" placeholder="Текст заметки"></textarea>
+    <button class="modal-save" onclick="saveNote()">Сохранить</button>
+    <button class="close-button" onclick="closeModal('noteModal')">Отмена</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));
+}
+</script>
+</body>
+</html>
